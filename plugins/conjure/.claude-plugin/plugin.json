@@ -6,7 +6,6 @@
     "name": "John Farina",
     "email": "johnfarina8@gmail.com"
   },
-  "category": "development",
   "keywords": [
     "plugin-development",
     "skill-generator",
@@ -23,15 +22,5 @@
     "hooks",
     "mcp",
     "developer-tools"
-  ],
-  "tags": [
-    "plugin-dev",
-    "scaffold",
-    "generator",
-    "skills",
-    "agents",
-    "hooks",
-    "mcp",
-    "beginner-friendly"
   ]
 }

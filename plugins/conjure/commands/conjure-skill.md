@@ -1,6 +1,6 @@
 ---
 name: conjure-skill
-description: Create or update a Claude Code skill (.md command file) with best practices. Usage: /conjure-skill <name> to create or update, /conjure-skill <name> faster|simpler|detailed|blank to transform. Classifies type, picks correct storage location, migrates if misplaced.
+description: "Create or update a Claude Code skill (.md command file) with best practices. Usage: /conjure-skill <name> to create or update, /conjure-skill <name> faster|simpler|detailed|blank to transform. Classifies type, picks correct storage location, migrates if misplaced."
 allowed-tools: Read,Write,Edit,Bash,Glob
 user-invocable: true
 argument-hint: "<skill-name> [faster|simpler|detailed|blank] OR <description of new skill>"
