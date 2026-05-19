@@ -1,0 +1,19 @@
+{
+  "name": "conjure",
+  "version": "1.0.0",
+  "description": "Build Claude Code extensions from plain language — skills, agents, hooks, and MCP servers.",
+  "author": {
+    "name": "John Farina",
+    "email": "johnfarina8@gmail.com"
+  },
+  "keywords": [
+    "skills",
+    "agents",
+    "hooks",
+    "mcp",
+    "build",
+    "scaffold",
+    "extensions",
+    "developer-tools"
+  ]
+}

@@ -1,0 +1,6 @@
+# un-ignore .claude-plugin so marketplace manifests are tracked
+!.claude-plugin/
+!.claude-plugin/**
+
+# never track personal project overrides
+.claude/conjure-config.md

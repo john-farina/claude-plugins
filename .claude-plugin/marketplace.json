@@ -1,0 +1,28 @@
+{
+  "name": "john-farina",
+  "owner": {
+    "name": "John Farina",
+    "email": "johnfarina8@gmail.com"
+  },
+  "metadata": {
+    "description": "Claude Code plugins I've built and use daily — tools for building extensions, automating workflows, and making Claude smarter about your project."
+  },
+  "plugins": [
+    {
+      "name": "conjure",
+      "source": "./plugins/conjure",
+      "description": "Build Claude Code extensions from plain language — skills, agents, hooks, and MCP servers.",
+      "version": "1.0.0",
+      "keywords": [
+        "skills",
+        "agents",
+        "hooks",
+        "mcp",
+        "build",
+        "scaffold",
+        "extensions",
+        "developer-tools"
+      ]
+    }
+  ]
+}
