@@ -1,19 +1,37 @@
 {
   "name": "conjure",
   "version": "1.0.0",
-  "description": "Build Claude Code extensions from plain language — skills, agents, hooks, and MCP servers.",
+  "description": "Build Claude Code skills, agents, hooks, and MCP servers from plain-language descriptions. Generate, validate, and ship plugins without writing boilerplate.",
   "author": {
     "name": "John Farina",
     "email": "johnfarina8@gmail.com"
   },
+  "category": "development",
   "keywords": [
+    "plugin-development",
+    "skill-generator",
+    "agent-builder",
+    "hook-builder",
+    "mcp-server-builder",
+    "scaffold",
+    "natural-language",
+    "plugin-creator",
+    "claude-code-plugin",
+    "extension-builder",
     "skills",
     "agents",
     "hooks",
     "mcp",
-    "build",
-    "scaffold",
-    "extensions",
     "developer-tools"
+  ],
+  "tags": [
+    "plugin-dev",
+    "scaffold",
+    "generator",
+    "skills",
+    "agents",
+    "hooks",
+    "mcp",
+    "beginner-friendly"
   ]
 }
