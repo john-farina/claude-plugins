@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+  <!-- Primary SEO -->
+  <title>Conjure — Build Claude Code Skills, Agents, Hooks & MCP Servers from Plain Language</title>
+  <meta name="description" content="Conjure is a Claude Code plugin that builds skills, agents, hooks, and MCP servers from plain-language descriptions. Describe what you want — conjure writes production-ready extensions instantly. No boilerplate.">
+  <meta name="keywords" content="claude code skill builder, claude code plugin, create claude code skill, build mcp server claude, claude code agent builder, claude code hook, claude code extension, claude slash command generator, mcp server builder, anthropic claude plugin, claude code workflow, natural language plugin builder, claude code scaffold, build claude extension, conjure claude, claude code commands, claude skill generator, claude agent template, claude hook builder, mcp server generator, claude code tools, anthropic extension builder, claude code automation">
+  <meta name="author" content="John Farina">
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <link rel="canonical" href="https://john-farina.github.io/claude-plugins/">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://john-farina.github.io/claude-plugins/">
+  <meta property="og:title" content="Conjure — Build Claude Code Extensions from Plain Language">
+  <meta property="og:description" content="Build Claude Code skills, agents, hooks, and MCP servers by describing what you want. No boilerplate. No manual wiring. Production-ready in one command.">
+  <meta property="og:site_name" content="Conjure for Claude Code">
+  <meta property="og:locale" content="en_US">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Conjure — Build Claude Code Extensions from Plain Language">
+  <meta name="twitter:description" content="Build Claude Code skills, agents, hooks, and MCP servers by describing what you want. No boilerplate. Production-ready instantly.">
+  <meta name="twitter:creator" content="@johnfarina">
+
+  <!-- Schema.org: SoftwareApplication -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Conjure",
+    "alternateName": ["conjure claude code", "conjure plugin", "claude code conjure", "conjure skill builder"],
+    "applicationCategory": "DeveloperApplication",
+    "applicationSubCategory": "Claude Code Plugin",
+    "operatingSystem": "macOS, Linux, Windows",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "description": "Build Claude Code skills, agents, hooks, and MCP servers from plain-language descriptions. Describe what you want, conjure classifies the extension type, asks targeted questions, and writes production-ready artifacts — no boilerplate, no manual wiring.",
+    "author": {
+      "@type": "Person",
+      "name": "John Farina",
+      "email": "johnfarina8@gmail.com"
+    },
+    "url": "https://john-farina.github.io/claude-plugins/",
+    "downloadUrl": "https://github.com/john-farina/claude-plugins",
+    "installUrl": "https://github.com/john-farina/claude-plugins",
+    "softwareVersion": "1.0.0",
+    "license": "https://github.com/john-farina/claude-plugins/blob/main/LICENSE",
+    "keywords": "claude code, skill builder, agent builder, hook builder, mcp server, plugin generator, natural language, scaffold, anthropic, claude extension",
+    "featureList": [
+      "Build Claude Code skills from plain language descriptions",
+      "Generate MCP servers with typed tools and resources",
+      "Create autonomous Claude Code agents",
+      "Write event-driven hooks with shell scripts",
+      "Auto-detects extension type from description",
+      "Searches existing solutions before building",
+      "User preference config system",
+      "Update mode — refines existing extensions"
+    ]
+  }
+  </script>
+
+  <!-- Schema.org: FAQPage (powers Google featured snippets) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How do I build a Claude Code skill?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Install conjure with 'claude plugin marketplace add john-farina/claude-plugins' then 'claude plugin install conjure@john-farina'. Run /conjure-skill and describe what you want. Conjure writes the .md command file, sets allowed-tools, handles argument parsing, and installs it immediately."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I build an MCP server for Claude Code?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Run /conjure-mcp and describe the external system or data source you want Claude to connect to. Conjure first searches smithery.ai and mcp.so for an existing solution. If none fits, it scaffolds a working server in Node.js, Python, or Go, writes all tool definitions, and registers it in settings.json."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I create a Claude Code agent?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Run /conjure-agent with a description of the task. Conjure handles orchestrator vs. worker architecture decisions, tool selection, maxTurns, permissionMode, model selection, and writes the agent definition to ~/.claude/agents/ or your project-local agents directory."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I add a hook to Claude Code?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Run /conjure-hook and describe what you want to trigger. Conjure writes both the shell script and the settings.json entry. Supports all hook events: PreToolUse, PostToolUse, SessionStart, UserPromptSubmit, and Stop."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is the difference between a Claude Code skill and an agent?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "A skill is a slash command a user types directly (e.g. /my-command). An agent is an autonomous worker that Claude spawns programmatically with its own isolated context, tool restrictions, and model. Use a skill for user-triggered workflows; use an agent for parallel or delegated subtasks."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is conjure for Claude Code?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Conjure is a Claude Code plugin that builds Claude Code extensions from plain-language descriptions. You describe what you want — a slash command, an agent, a hook, or an MCP server — and conjure classifies the type, asks targeted questions, and writes production-ready code. No boilerplate, no manual wiring."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I install conjure for Claude Code?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Run two commands: 'claude plugin marketplace add john-farina/claude-plugins' to add the marketplace, then 'claude plugin install conjure@john-farina' to install conjure. Start a new Claude Code session and type /conjure."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can conjure update existing Claude Code extensions?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. Every conjure command auto-detects create vs. update mode. Provide the name of an existing skill, agent, hook, or MCP server and conjure reads the current artifact in full before refining it. You never need to say 'update'."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What Claude Code hook events are supported?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Conjure supports all Claude Code hook events: PreToolUse (blocking — runs before any tool call), PostToolUse (non-blocking — runs after), SessionStart (non-blocking — fires on session open), UserPromptSubmit (blocking — fires on every user message), and Stop (can block — fires when Claude finishes responding)."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Does conjure work with any project or just specific languages?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Conjure works with any project. The extensions it builds are Claude Code artifacts (.md command files, shell scripts, JSON config, and MCP servers in Node.js, Python, or Go). They are language-agnostic and work regardless of what codebase Claude Code is running against."
+        }
+      }
+    ]
+  }
+  </script>
+
+  <!-- Schema.org: WebSite with SearchAction -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "Conjure for Claude Code",
+    "url": "https://john-farina.github.io/claude-plugins/",
+    "description": "Build Claude Code skills, agents, hooks, and MCP servers from plain language",
+    "publisher": {
+      "@type": "Person",
+      "name": "John Farina"
+    }
+  }
+  </script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d0d0d;
+      --surface: #161616;
+      --border: #2a2a2a;
+      --text: #e8e8e8;
+      --muted: #888;
+      --accent: #d97706;
+      --accent2: #7c3aed;
+      --code-bg: #1a1a1a;
+      --green: #22c55e;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+    }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .container { max-width: 860px; margin: 0 auto; padding: 0 24px; }
+
+    /* NAV */
+    nav {
+      border-bottom: 1px solid var(--border);
+      padding: 16px 0;
+    }
+    nav .container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .nav-logo {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.5px;
+    }
+    .nav-logo span { color: var(--accent); }
+    .nav-links { display: flex; gap: 24px; }
+    .nav-links a { color: var(--muted); font-size: 14px; }
+    .nav-links a:hover { color: var(--text); text-decoration: none; }
+
+    /* HERO */
+    .hero {
+      padding: 80px 0 64px;
+      text-align: center;
+    }
+    .badge {
+      display: inline-block;
+      background: rgba(124,58,237,0.15);
+      border: 1px solid rgba(124,58,237,0.3);
+      color: #a78bfa;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 100px;
+      margin-bottom: 24px;
+    }
+    h1 {
+      font-size: clamp(32px, 5vw, 52px);
+      font-weight: 800;
+      letter-spacing: -1.5px;
+      line-height: 1.1;
+      margin-bottom: 20px;
+      color: #fff;
+    }
+    h1 em { font-style: normal; color: var(--accent); }
+    .hero-sub {
+      font-size: 18px;
+      color: var(--muted);
+      max-width: 580px;
+      margin: 0 auto 40px;
+      line-height: 1.7;
+    }
+    .install-block {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 24px;
+      max-width: 560px;
+      margin: 0 auto 16px;
+      text-align: left;
+    }
+    .install-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+    .install-block code {
+      font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+      font-size: 13px;
+      color: var(--green);
+      display: block;
+      line-height: 1.8;
+    }
+    .hero-note {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    /* TYPES GRID */
+    .section { padding: 64px 0; border-top: 1px solid var(--border); }
+    h2 {
+      font-size: clamp(22px, 3vw, 28px);
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      margin-bottom: 12px;
+      color: #fff;
+    }
+    .section-sub {
+      color: var(--muted);
+      margin-bottom: 40px;
+      font-size: 16px;
+    }
+
+    .types-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+    }
+    .type-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      transition: border-color 0.2s;
+    }
+    .type-card:hover { border-color: #444; }
+    .type-icon {
+      font-size: 24px;
+      margin-bottom: 12px;
+      display: block;
+    }
+    .type-card h3 {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: #fff;
+    }
+    .type-card p {
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.6;
+      margin-bottom: 12px;
+    }
+    .type-cmd {
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 12px;
+      color: var(--accent);
+      background: rgba(217,119,6,0.1);
+      padding: 4px 8px;
+      border-radius: 6px;
+    }
+
+    /* HOW IT WORKS */
+    .steps { display: flex; flex-direction: column; gap: 20px; }
+    .step {
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+    }
+    .step-num {
+      flex-shrink: 0;
+      width: 32px;
+      height: 32px;
+      background: rgba(217,119,6,0.15);
+      border: 1px solid rgba(217,119,6,0.3);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--accent);
+    }
+    .step-content h3 { font-size: 15px; font-weight: 600; margin-bottom: 4px; color: #fff; }
+    .step-content p { font-size: 14px; color: var(--muted); }
+
+    /* COMMANDS TABLE */
+    .cmd-table { width: 100%; border-collapse: collapse; }
+    .cmd-table th {
+      text-align: left;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      padding: 0 12px 12px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .cmd-table td {
+      padding: 12px 12px 12px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 14px;
+      vertical-align: top;
+    }
+    .cmd-table td:first-child {
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      color: var(--accent);
+      white-space: nowrap;
+    }
+    .cmd-table td:last-child { color: var(--muted); }
+
+    /* FAQ */
+    .faq-list { display: flex; flex-direction: column; gap: 2px; }
+    details {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    details + details { margin-top: 8px; }
+    summary {
+      padding: 16px 20px;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--text);
+      list-style: none;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--surface);
+      transition: background 0.15s;
+    }
+    summary:hover { background: #1e1e1e; }
+    summary::after {
+      content: '+';
+      color: var(--muted);
+      font-size: 18px;
+      font-weight: 300;
+      flex-shrink: 0;
+    }
+    details[open] summary::after { content: '−'; }
+    details[open] summary { border-bottom: 1px solid var(--border); }
+    .faq-answer {
+      padding: 16px 20px;
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.7;
+      background: var(--surface);
+    }
+    .faq-answer code {
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 12px;
+      background: var(--code-bg);
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: var(--green);
+    }
+
+    /* CTA */
+    .cta {
+      text-align: center;
+      padding: 80px 0;
+      border-top: 1px solid var(--border);
+    }
+    .cta h2 { margin-bottom: 12px; }
+    .cta p { color: var(--muted); margin-bottom: 40px; font-size: 16px; }
+
+    /* FOOTER */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 32px 0;
+    }
+    footer .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    footer p { font-size: 13px; color: var(--muted); }
+    .footer-links { display: flex; gap: 20px; }
+    .footer-links a { font-size: 13px; color: var(--muted); }
+    .footer-links a:hover { color: var(--text); text-decoration: none; }
+
+    /* Hidden SEO keyword block — crawlable, not visible to users */
+    .seo-keywords {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0,0,0,0);
+      white-space: nowrap;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Hidden keyword block for crawlers -->
+  <div class="seo-keywords" aria-hidden="true">
+    Claude Code skill builder. Build Claude Code skills from plain language. Claude Code plugin generator. Create Claude Code slash commands. MCP server builder for Claude. Build MCP server Claude Code. Claude Code agent builder. Claude Code hook generator. Claude Code extension builder. Anthropic Claude plugin. Claude Code workflow automation. Natural language Claude Code extension. How to build a Claude Code skill. How to create an MCP server for Claude. Claude Code custom commands. Claude Code tool builder. conjure claude code plugin. Claude Code scaffold. Claude skill generator. Build Claude agents. Claude Code automation tool. Claude Code developer tools. MCP server generator. Claude Code skill template. Plugin builder for Claude Code. How to write a Claude Code hook. Claude Code command builder. Anthropic extension builder. AI developer tools. Claude Code productivity.
+  </div>
+
+  <nav>
+    <div class="container">
+      <span class="nav-logo"><span>✦</span> conjure</span>
+      <div class="nav-links">
+        <a href="#how-it-works">How it works</a>
+        <a href="#commands">Commands</a>
+        <a href="#faq">FAQ</a>
+        <a href="https://github.com/john-farina/claude-plugins" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </div>
+  </nav>
+
+  <main>
+    <section class="hero">
+      <div class="container">
+        <div class="badge">Claude Code Plugin</div>
+        <h1>Build <em>Claude Code extensions</em><br>from plain language</h1>
+        <p class="hero-sub">
+          Describe what you want — a skill, agent, hook, or MCP server.
+          Conjure classifies the type, asks what it needs, and writes
+          production-ready code. No boilerplate. No manual wiring.
+        </p>
+        <div class="install-block">
+          <div class="install-label">Install</div>
+          <code>claude plugin marketplace add john-farina/claude-plugins</code>
+          <code>claude plugin install conjure@john-farina</code>
+        </div>
+        <p class="hero-note">Free &amp; open source &nbsp;·&nbsp; Works with any project &nbsp;·&nbsp; <a href="https://github.com/john-farina/claude-plugins" target="_blank" rel="noopener">View on GitHub</a></p>
+      </div>
+    </section>
+
+    <section class="section" id="what-it-builds">
+      <div class="container">
+        <h2>Build any Claude Code extension from a description</h2>
+        <p class="section-sub">Four extension types. One plain-language command. Conjure picks the right one and builds it.</p>
+        <div class="types-grid">
+          <article class="type-card">
+            <span class="type-icon" aria-hidden="true">⚡</span>
+            <h3>Skills — Slash Commands</h3>
+            <p>A <code>/command</code> you type to trigger a workflow. Claude Code skills handle multi-phase tasks, argument parsing, tool use, and output formatting.</p>
+            <span class="type-cmd">/conjure-skill</span>
+          </article>
+          <article class="type-card">
+            <span class="type-icon" aria-hidden="true">🤖</span>
+            <h3>Agents — Autonomous Workers</h3>
+            <p>Isolated workers Claude spawns programmatically. Agents run with their own context, tool restrictions, model selection, and turn limits.</p>
+            <span class="type-cmd">/conjure-agent</span>
+          </article>
+          <article class="type-card">
+            <span class="type-icon" aria-hidden="true">🪝</span>
+            <h3>Hooks — Event Triggers</h3>
+            <p>Shell scripts that fire automatically on lifecycle events — before tool calls, after edits, on session start, on every prompt. Blocking or non-blocking.</p>
+            <span class="type-cmd">/conjure-hook</span>
+          </article>
+          <article class="type-card">
+            <span class="type-icon" aria-hidden="true">🔌</span>
+            <h3>MCP Servers — Live Connections</h3>
+            <p>Connect Claude to any external system — databases, APIs, internal tools. Scaffolds a full server with typed tools, resources, and settings.json registration.</p>
+            <span class="type-cmd">/conjure-mcp</span>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="how-it-works">
+      <div class="container">
+        <h2>How conjure works</h2>
+        <p class="section-sub">Start with /conjure — it handles the rest.</p>
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-content">
+              <h3>Describe what you want</h3>
+              <p>Type <code>/conjure</code> followed by a plain-language description — or just the name of an existing extension to update it. Conjure infers the extension type automatically.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-content">
+              <h3>Conjure checks for existing solutions</h3>
+              <p>For MCP servers and agents, conjure searches smithery.ai, mcp.so, and GitHub before building. If a strong match exists, install it directly instead of starting from scratch.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-content">
+              <h3>Targeted intake questions</h3>
+              <p>Conjure asks only what it needs — tool access, trigger conditions, output format, storage location. Your preferences from <code>/conjure-config</code> are applied automatically so you skip questions you've already answered globally.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">4</div>
+            <div class="step-content">
+              <h3>Production-ready artifact, installed immediately</h3>
+              <p>The extension is written, validated, and ready to use before conjure finishes. Skills are invocable in the same session. Hooks are wired into settings.json. MCP servers are registered and running.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="commands">
+      <div class="container">
+        <h2>Commands</h2>
+        <p class="section-sub">Seven commands — start with <code>/conjure</code> if you're unsure which to use.</p>
+        <table class="cmd-table">
+          <thead>
+            <tr>
+              <th>Command</th>
+              <th>What it builds</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>/conjure</td>
+              <td>Auto-detects type from your description and delegates to the right command</td>
+            </tr>
+            <tr>
+              <td>/conjure-skill</td>
+              <td>Claude Code slash commands and multi-phase workflows</td>
+            </tr>
+            <tr>
+              <td>/conjure-agent</td>
+              <td>Autonomous worker definitions with tool restrictions and model config</td>
+            </tr>
+            <tr>
+              <td>/conjure-hook</td>
+              <td>Event-driven shell scripts wired into settings.json</td>
+            </tr>
+            <tr>
+              <td>/conjure-mcp</td>
+              <td>Model Context Protocol servers in Node.js, Python, or Go</td>
+            </tr>
+            <tr>
+              <td>/conjure-config</td>
+              <td>Set plain-language preferences all conjure commands follow automatically</td>
+            </tr>
+            <tr>
+              <td>/conjure-help</td>
+              <td>Full reference — all argument syntax, hook events, update mode, examples</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="section" id="faq">
+      <div class="container">
+        <h2>Frequently asked questions</h2>
+        <p class="section-sub">Common questions about building Claude Code extensions with conjure.</p>
+        <div class="faq-list">
+          <details>
+            <summary>How do I install conjure?</summary>
+            <div class="faq-answer">
+              Run two commands in your terminal:<br><br>
+              <code>claude plugin marketplace add john-farina/claude-plugins</code><br>
+              <code>claude plugin install conjure@john-farina</code><br><br>
+              Start a new Claude Code session. Type <code>/conjure</code> to begin.
+            </div>
+          </details>
+          <details>
+            <summary>How do I create a Claude Code skill (slash command)?</summary>
+            <div class="faq-answer">
+              Run <code>/conjure-skill</code> and describe the command you want — what triggers it, what it should do, and any tools it needs. Conjure writes the <code>.md</code> command file with proper frontmatter, tool declarations, and phased instructions. It's immediately usable in the same session.
+            </div>
+          </details>
+          <details>
+            <summary>How do I build an MCP server for Claude Code?</summary>
+            <div class="faq-answer">
+              Run <code>/conjure-mcp</code> and describe the external system you want to connect — a database, a REST API, an internal tool. Conjure searches smithery.ai and mcp.so first to see if a matching server already exists. If not, it scaffolds a working server with typed tools and registers it in <code>settings.json</code>.
+            </div>
+          </details>
+          <details>
+            <summary>How do I add a hook to Claude Code?</summary>
+            <div class="faq-answer">
+              Run <code>/conjure-hook</code> and describe the trigger and behavior you want. For example: "run prettier on every file Claude edits" or "inject my coding standards on every prompt." Conjure writes the shell script and adds the hook entry to <code>settings.json</code> automatically.
+            </div>
+          </details>
+          <details>
+            <summary>What is the difference between a skill and an agent?</summary>
+            <div class="faq-answer">
+              A <strong>skill</strong> is a slash command a user types — it runs in the main Claude context. An <strong>agent</strong> is an autonomous worker Claude spawns programmatically, with its own isolated context, separate tool permissions, and turn limits. Use skills for user-triggered workflows; use agents for parallel or delegated subtasks.
+            </div>
+          </details>
+          <details>
+            <summary>Can conjure update extensions I already have?</summary>
+            <div class="faq-answer">
+              Yes. Every conjure command auto-detects create vs. update mode. Provide the name of an existing extension and conjure reads it in full before refining it. You never need to say "update" — conjure figures it out from the name.
+            </div>
+          </details>
+          <details>
+            <summary>Does conjure work with any project or just specific languages?</summary>
+            <div class="faq-answer">
+              Conjure works with any project. The extensions it builds are Claude Code artifacts — <code>.md</code> files, shell scripts, JSON config, and MCP servers. They're language-agnostic and work regardless of what codebase Claude Code is running against.
+            </div>
+          </details>
+          <details>
+            <summary>How does /conjure-config work?</summary>
+            <div class="faq-answer">
+              Run <code>/conjure-config</code> for interactive setup. Conjure asks about your preferences — output paths, naming conventions, required frontmatter, VCS tool, author name — and writes plain-language instructions to <code>~/.claude/conjure-config.md</code> (global) or <code>.claude/conjure-config.md</code> (project-local). Every conjure command reads these automatically. Project-local wins on conflicts.
+            </div>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <section class="cta">
+      <div class="container">
+        <h2>Start building in 30 seconds</h2>
+        <p>Two commands. Then describe what you want.</p>
+        <div class="install-block" style="margin: 0 auto;">
+          <div class="install-label">Install conjure</div>
+          <code>claude plugin marketplace add john-farina/claude-plugins</code>
+          <code>claude plugin install conjure@john-farina</code>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>Built by <a href="https://github.com/john-farina" target="_blank" rel="noopener">John Farina</a> &nbsp;·&nbsp; MIT License</p>
+      <div class="footer-links">
+        <a href="https://github.com/john-farina/claude-plugins" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://github.com/john-farina/claude-plugins/blob/main/PRIVACY.md" target="_blank" rel="noopener">Privacy</a>
+        <a href="https://github.com/john-farina/claude-plugins/blob/main/LICENSE" target="_blank" rel="noopener">License</a>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>
