@@ -66,7 +66,7 @@ Auto-detects type, runs intake, delegates to the right command.
 /conjure-skill <description>          Create with inline description — builds immediately
 ```
 
-**Storage:** action skills → `~/.claude/commands/<name>.md` · knowledge skills → `~/.claude/skills/<name>/SKILL.md`
+**Storage:** every skill → `~/.claude/skills/<name>/SKILL.md` (or `<repo>/.claude/skills/`, committed). never a `commands/*.md` alias. archived skills: `~/.claude/skill-archive/archive.py list`
 
 ---
 

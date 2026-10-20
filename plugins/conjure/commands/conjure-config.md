@@ -109,7 +109,7 @@ Write them exactly as you would write a rule in CLAUDE.md: direct, imperative, s
 
 ```
 ## skills
-Always write skill files to ~/.claude/commands/ios/ instead of the default location.
+Always write skill files to ~/.claude/skills/ios-<name>/ instead of the default location.
 Name skills with the prefix "ios-" (e.g., ios-commit, ios-review).
 Always add `keep-coding-instructions: true` to frontmatter.
 Always include Bash and Glob in allowed-tools.
@@ -145,7 +145,7 @@ After writing, show a brief confirmation:
 ```
 ✓ Added to ~/.claude/conjure-config.md → ## skills
 
-  "Always write skill files to ~/.claude/commands/ios/ instead of the default location."
+  "Always write skill files to ~/.claude/skills/ios-<name>/ instead of the default location."
 
 Conjure commands will follow this on their next run.
 ```
