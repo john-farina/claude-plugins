@@ -1,6 +1,6 @@
 ---
 name: conjure-skill
-description: "Create or update a Claude Code skill (.md command file) with best practices. Usage: /conjure-skill <name> to create or update, /conjure-skill <name> faster|simpler|detailed|blank to transform. Classifies type, picks correct storage location, migrates if misplaced."
+description: "Create or update a Claude Code skill (SKILL.md) with best practices. Usage: /conjure-skill <name> to create or update, /conjure-skill <name> faster|simpler|detailed|blank to transform. Classifies type, picks correct storage location, migrates if misplaced."
 allowed-tools: Read,Write,Edit,Bash,Glob
 user-invocable: true
 argument-hint: "<skill-name> [faster|simpler|detailed|blank] OR <description of new skill>"
@@ -64,30 +64,33 @@ Parse `$ARGUMENTS`:
 | `<name> --git-history` | **Git-extract** — analyze git history for pattern extraction, then run quality gate before writing final file |
 | `<name> review` | **Review** — run quality gate on existing skill, report issues, apply fixes |
 
-**Two storage patterns — pick based on skill type:**
+**Storage — one file, one name, never a `commands/*.md` file.** Commands are skills now: a thin alias
+command registers the name twice and doubles its listing cost.
 
-| Storage | Path | Use for |
-|---------|------|---------|
-| **Command** | `~/.claude/commands/<name>.md` | Action/workflow skills (commit, build, review, deploy) |
-| **Knowledge skill** | `~/.claude/skills/<name>/SKILL.md` + alias | Domain knowledge, reference content, codebase expertise |
+Pick the scope first (ask only if the request leaves it open):
 
-For **knowledge skills**: after writing `~/.claude/skills/<name>/SKILL.md`, also write a thin alias at `~/.claude/commands/<name>.md`:
-```markdown
----
-name: <name>
-description: <same description as SKILL.md>
----
+| Scope | Path | Use for |
+|---|---|---|
+| **core** (every session) | `~/.claude/skills/<name>/SKILL.md` | used across repos, weekly or more |
+| **repo** | `<repo>/.claude/skills/<name>/SKILL.md`, committed | only meaningful in one repo. Untracked repo skills are invisible to worktree sessions, so commit them |
+| **team** | `/triumph-skills:share-skill <name>` after building it under `~/.claude/skills` | everyone on the team |
 
-Read and follow `~/.claude/skills/<name>/SKILL.md`.
+Rarely used personal tools stay core but get `"<name>": "name-only"` under `skillOverrides` in
+`~/.claude/settings.json`, so they're invocable by name without paying listing cost.
+
+**Before writing, check for collisions and prior art:**
+```bash
+ls ~/.claude/skills .claude/skills 2>/dev/null | grep -i "<name>"
+~/.claude/skill-archive/archive.py list <keywords>        # archived skills, restorable by name
+PATH=/opt/homebrew/bin:$HOME/.bun/bin:$PATH qmd search "<what it does>" -c skill-archive -n 5
 ```
+If an archived skill fits, restore it (`archive.py restore <name>`) and update it instead of creating a new one.
 
-**To detect which exists:** check `~/.claude/commands/<name>.md` first, then `~/.claude/skills/<name>/SKILL.md`. If neither exists, determine from the description — domain knowledge → knowledge skill path, action workflow → command path.
-
-**Migration (move to correct location):** After classifying the skill type, compare current storage location against the correct one. If mismatched:
+**Existing file in the wrong place** (a `commands/<name>.md`, or a SKILL.md plus an alias command):
 1. Read the existing file(s)
-2. Write to the correct location(s)
-3. Delete the old file(s) with `Bash`: `rm <old-path>`
-4. Report the move in the output: `moved: <old-path> → <new-path>`
+2. Write `~/.claude/skills/<name>/SKILL.md` (or the repo path)
+3. Archive the old file: `~/.claude/skill-archive/archive.py move <old-path>`, never `rm`
+4. Report the move: `moved: <old-path> → <new-path>`
 
 ## Phase 2: Classify Skill Type
 
@@ -115,7 +118,6 @@ when_to_use: "<example phrases users would type — counts toward 1,536-char cap
 argument-hint: "[arg1] [arg2]"          # cosmetic — shows in autocomplete only
 arguments: [name, type]                  # enables $name substitution in body (positional)
 allowed-tools: Read Write Edit Bash Glob # space-separated; GRANTS approval, does NOT restrict
-disable-model-invocation: true           # side-effect skills (commit, deploy, send) — also removes skill from context
 user-invocable: false                    # hides from /menu only; does NOT block Skill tool invocation
 effort: low|medium|high|xhigh|max       # overrides session effort level for this skill's turn
 context: fork                            # run in isolated subagent context — no conversation history
@@ -130,8 +132,8 @@ hooks:                                   # lifecycle hooks scoped to this skill'
 ```
 
 **Rules:**
-- `description` + `when_to_use` combined capped at **1,536 chars** — put trigger phrase first in `description`, examples/synonyms in `when_to_use`. Configurable via `maxSkillDescriptionChars` setting.
-- Add `disable-model-invocation: true` for ANY skill that commits, pushes, sends, deploys, or deletes. This removes the skill from Claude's context entirely — it won't auto-invoke. ⚠️ Known bug (#31935): description may still appear in skill listing despite this flag; treat it as best-effort.
+- `description` + `when_to_use`: aim for **≤ 300 chars** combined (hard cap 1,536; the agentskills spec caps description at 1,024). Every char is paid in every session's skill listing, and when the listing overflows, Claude Code drops descriptions of the least-used skills first.
+- Never add `disable-model-invocation: true` to the user's own skills: agents (farina-bot, loops, subagents) invoke them through the Skill tool, and the flag blocks that. Guard side effects inside the body (a confirm step) instead.
 - `user-invocable: false` hides from the `/` menu only. To block programmatic invocation, use `disable-model-invocation: true`.
 - `context: fork` creates an isolated subagent with no conversation history. **CLAUDE.md is skipped only when `agent: Explore` or `agent: Plan`** — other agents still load it.
 - `allowed-tools` **GRANTS approval** (Claude can use those tools without prompting) — it does NOT restrict. Claude can still call other tools. Scoped syntax: `Bash(git add *)` limits Bash to that pattern.
@@ -256,7 +258,7 @@ Rules:
 
 ### Comprehensive Skill Body Pattern
 
-For skills that genuinely need depth: write to `~/.claude/skills/<name>/` with supporting files, plus a thin alias command.
+For skills that genuinely need depth: write to `~/.claude/skills/<name>/` with supporting files.
 
 ```
 ~/.claude/skills/<name>/
@@ -265,8 +267,6 @@ For skills that genuinely need depth: write to `~/.claude/skills/<name>/` with s
     ├── architecture.md
     ├── patterns.md
     └── examples.md
-
-~/.claude/commands/<name>.md  ← alias: "Read and follow ~/.claude/skills/<name>/SKILL.md"
 ```
 
 SKILL.md structure:
@@ -332,7 +332,7 @@ Write the complete skill file. Then print:
 ✓ wrote: <path>
   type: <fast|reference|standard|comprehensive>
   invoke: /<name>
-  auto-invoke: <yes|no — based on disable-model-invocation>
+  scope: <core|name-only|repo|team>
 ```
 
 ## Phase 6.5: Quality Review (runs after every create, update, or explicit `review` mode)
@@ -349,6 +349,9 @@ Apply fixes for any warnings. Then evaluate manually:
 3. **`$ARGUMENTS` handled** — Phase 1 explicitly parses it?
 4. **Proactive triggers present** — does the skill surface relevant issues without being asked?
 5. **Related skills present** — disambiguation clause if similar skills exist?
+6. **One copy** — `ls ~/.claude/commands/<name>.md` must not exist; no second skill with the same name anywhere in scope.
+7. **Description ≤ 300 chars**, frontmatter parses (`uv run --with pyyaml python3 -c "import yaml,sys; yaml.safe_load(open(sys.argv[1]).read().split('---')[1])" <path>`).
+8. **Trigger test** — name 2 phrases the user would type; the description must contain their key words. For a team skill, add them as evals via share-skill.
 
 For `review` mode: report findings as a numbered list with severity (fix / warning / suggestion), then apply all fixes and re-run the review script to confirm clean.
 
@@ -360,7 +363,7 @@ For create/update: apply fixes silently before writing the final file. Only surf
 
 **Frontmatter**
 - Trigger phrase in sentence 1 of `description` — not buried
-- `disable-model-invocation` on every side-effect skill
+- never `disable-model-invocation` on the user's skills (agents invoke them)
 - `allowed-tools` = only what the body actually calls (space-separated)
 - Skip optional fields that don't change behavior
 
@@ -377,7 +380,7 @@ For create/update: apply fixes silently before writing the final file. Only surf
 - Long narrative explaining why a step exists
 - Reading files Claude doesn't need
 - `context: fork` on a skill that references conversation state
-- `disable-model-invocation: false` on deploy/commit/send skills
+- writing a `commands/<name>.md` alias next to a SKILL.md
 - Phases with multiple unrelated actions
 - Body that documents the codebase instead of instructing Claude
 - Using `$1` to mean "first arg" — `$0` is first, `$1` is second (0-indexed)
